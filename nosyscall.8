@@ -1,0 +1,134 @@
+.\"
+.\" SPDX-License-Identifier: BSD-2-Clause
+.\"
+.\" Copyright (c) 2021-2026 Ruslan Zalata <rz@fabmicro.ru>
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.Dd October 4, 2026
+.Dt NOSYSCALL 8
+.Os
+.Sh NAME
+.Nm nosyscall
+.Nd is a simple tool to skip (fake), reject or block selected syscalls for an
+application.
+.Sh SYNOPSIS
+.Nm
+.Op Fl srbtv 
+.Ar syscall_number prog ...
+.Sh DESCRIPTION
+The
+.Nm
+utility uses 
+.Ar ptrace(2)
+to run a program
+.Ar prog
+under supervision skipping (faking), rejecting or blocking execution of given
+.Ar syscall_number .
+By faking it means a fake success (0) result code will be returned to program
+without actually performing requested syscall. Similarly, when rejecting, a
+fake (-1) result code is returned to program. When blocking is set and program
+calls a matching
+.Ar syscall_number ,
+its execution is stopped and utility quits with result code (-2) allowing to
+setup syscall traps for program under supervision.
+
+.Nm
+utility can be used to trace both FreeBSD and Linux programs running under
+Linuxulator, hence it's useful for reverse-engineering or for setting work-arounds
+over blocks in Linux proprietary binaries. Note, that FreeBSD and Linux have
+different system call numbers. FreeBSD syscall numbers can be found in
+.Ar /usr/include/sys/syscall.h .
+
+.Pp
+The following options are available:
+.Bl -tag -width indent
+.It Fl r
+Reject
+.Ar syscall_number ,
+return from syscall with -1 error code.
+.It Fl s
+Skip
+.Ar syscall_number ,
+return from syscall with 0 error code faking suscess.
+.It Fl b
+Block
+.Ar syscall_number ,
+stop execution with status code -2.
+.It Fl t
+Trace
+.Ar syscall_number ,
+print details when syscall matches.
+.It Fl v
+Be verbose, print details on each syscall.
+.El 
+.Sh NOTES
+The
+.Ar syscall_number
+can be either a positive interger number, or a tuple like
+.Ar number:arg=val
+where
+.Ar number
+is matching syscall number,
+.Ar arg
+defines syscall argument number starting from zero, and
+.Ar val
+defines integer value of the
+.Ar arg .
+In this case trap triggers when program calls syscall
+.Ar number
+with argument
+.Ar arg
+having value
+.Ar val .
+.Pp
+It is possible to provide up to 256 flags intermixing syscall skipping,
+rejecting, blocking and tracing.
+.Pp
+This utility currently supports only x86 platforms.
+.El
+.Sh EXIT STATUS
+.Bl -tag -width indent
+.It -1 on error parsing arguments.
+.It -2 when syscall block triggers. 
+.El 
+.Sh EXAMPLES
+To reject open() syscall for /bin/ls:
+.Bd -literal -offset indent
+\*[Gt] nosyscall -v -r 5 /bin/ls 
+.Ed
+.Pp
+To run linux binary /some/linux/app faking fcntl() syscall when cmd is F_SETLK:
+.Bd -literal -offset indent
+\*[Gt] nosyscall -v -s 72:1=6 /some/linux/app 
+.Ed
+.Pp
+Basically, the above fakes setting lock on a file.
+.Ed
+.Pp
+.Sh SEE ALSO
+.Xr ptrace 2 ,
+.Xr syscall 2 ,
+.Xr truss 1
+.Sh AUTHORS
+.An Ruslan Zalata Aq Mt rz@fabmicro.ru
