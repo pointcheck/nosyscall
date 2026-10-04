@@ -64,7 +64,7 @@ addsyscall(char *str, int mode)
 
 	if (idx == BLOCK_LIST_SIZE) {
 		fprintf(stderr, "No more room in block list!\n");
-		exit(EXIT_FAILURE);
+		exit(-EXIT_FAILURE);
 	}
 
 	block_syscall_list[idx].mode = mode;
@@ -163,7 +163,7 @@ run(char **argv)
 	status = ptrace(PT_TRACE_ME, 0, 0, 0);
 
 	if (status != 0)
-		exit(EXIT_FAILURE);
+		exit(-EXIT_FAILURE);
 
 	execv(argv[0], argv);
 }
@@ -185,7 +185,7 @@ usage(const char *prog)
 	  "Copyright (C) 2021-2026, Ruslan Zalata <rz@fabmicro.ru>\n\n",
 	prog, prog);
 
-	exit(EXIT_FAILURE);
+	exit(-EXIT_FAILURE);
 }
 
 
@@ -207,7 +207,7 @@ main(int argc, char **argv)
 	if (block_syscall_list == NULL) {
 		fprintf(stderr, "Cannot allocate memory for block list: %s\n",
 			strerror(errno));
-		exit(EXIT_FAILURE);
+		exit(-EXIT_FAILURE);
 	}
 
 	memset((void *) block_syscall_list, 0,
@@ -260,7 +260,7 @@ main(int argc, char **argv)
 	pid = fork();
 	if (pid == -1) {
 		fprintf(stderr, "Fork failed: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
+		exit(-EXIT_FAILURE);
 	} else if (pid == 0) {
 		run(argv);
 	} else {
@@ -270,7 +270,7 @@ main(int argc, char **argv)
 
 		if (wait(0) == -1) {
 			fprintf(stderr, "Wait failed.\n");
-			exit(EXIT_FAILURE);
+			exit(-EXIT_FAILURE);
 		}
 
 		/* Get ABI type */
@@ -286,7 +286,7 @@ main(int argc, char **argv)
 		if (sysctl(mib, 4, abi, &len, NULL, 0) < 0) {
 			fprintf(stderr, "Failed to get ABI type: %s\n",
 				strerror(errno));
-			exit(EXIT_FAILURE);
+			exit(-EXIT_FAILURE);
 		}
 
 		if (verbose)
@@ -401,7 +401,7 @@ main(int argc, char **argv)
 			case MODE_BLOCK:
 				if (verbose)
 					fprintf(stderr, "\tBlocking this syscall!\n");
-				exit(2);
+				exit(-2);
 				break;
 
 			default:
