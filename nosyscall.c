@@ -173,13 +173,14 @@ void
 usage(const char *prog)
 {
 	fprintf(stderr, "Usage:\n"
-	  "\t%s [-srb] syscall_num:arg_num=arg_val /path/to/program_to_be_traced\n"
-	  "\t%s [-srb] syscall_number /path/to/program_to_be_traced\n\n"
+	  "\t%s [-srbtv] syscall_num:arg_num=arg_val /path/to/program_to_be_traced\n"
+	  "\t%s [-srbtv] syscall_number /path/to/program_to_be_traced\n\n"
 	  "\t-s - to skip given syscall, will return 0 to tracee\n"
 	  "\t-r - to reject given syscall, will return -1 to tracee\n"
 	  "\t-b - to block given syscall, will stop execution and quit\n"
 	  "\t-t - don't do anything, just trace (print info when syscall is met).\n\n"
-	  "\tA syscall can be identified by 'syscall_num' number and one of its parameters\n"
+	  "\t-v - verbose mode (report each syscall).\n\n"
+	  "\tA syscall can be identified by 'syscall_num' number and one of its parameter\n"
 	  "\tset by 'arg_num' and value 'arg_val'. There can be no more that 256 blocks set at once.\n\n"
 	  "Copyright (C) 2021-2026, Ruslan Zalata <rz@fabmicro.ru>\n\n",
 	prog, prog);
