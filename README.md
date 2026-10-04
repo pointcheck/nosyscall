@@ -23,8 +23,8 @@ architecture, you have to modify register names.
 
 ```
 Usage:
-	./nosyscall [-srb] syscall_num:arg_num=arg_val /path/to/program_to_be_traced
-	./nosyscall [-srb] syscall_number /path/to/program_to_be_traced
+	./nosyscall [-srbtv] syscall_num:arg_num=arg_val /path/to/program_to_be_traced
+	./nosyscall [-srbtv] syscall_number /path/to/program_to_be_traced
 
 	-s - to skip given syscall, will return 0 to tracee
 	-r - to reject given syscall, will return -1 to tracee
@@ -43,7 +43,7 @@ To run 1C:Enterprise (1C:Предприятие) Linux (x86-amd64) binary on Fre
 nosyscall -v -s 72:1=6 ./opt/1C/v8.3/x86_64/1cv8c
 ```
 
-Copyright (C) 2021, Fabmicro, LLC., Tyumen, Russia. Written by Ruslan Zalata <rz@fabmicro.ru>
+Copyright (C) 2021-2026, Ruslan Zalata <rz@fabmicro.ru>
 
 SPDX-License-Identifier: BSD-2-Clause
 
